@@ -6,6 +6,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxt/icon', '@nuxt/ui'],
   css: ['~/assets/css/main.css'],
+  ssr: false,
   app: {
     pageTransition: { name: 'page', mode: 'out-in' },
   },

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import BackIcon from "~/components/BackIcon.vue";
-
 definePageMeta({
   layout: 'user',
 })

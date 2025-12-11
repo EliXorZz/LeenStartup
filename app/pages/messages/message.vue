@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import BackIcon from "~/components/BackIcon.vue";
-
 definePageMeta({
   layout: 'user',
 })
@@ -12,7 +10,8 @@ interface Message {
 const messages = ref<Message[]>([
   { text: 'Bonjour ! Comment puis-je t’aider pour ton tatouage ?', sender: 'other' },
   { text: 'Bonjour ! Je voudrais couvrir une cicatrice sur mon bras.', sender: 'user' },
-  { text: 'Très bien ! Quelle taille et quelle zone exactement ?', sender: 'other' }
+  { text: 'Très bien ! Quelle taille et quelle zone exactement ?', sender: 'other' },
+  { text: 'Parfait', sender: 'user' },
 ])
 </script>
 
@@ -29,7 +28,7 @@ const messages = ref<Message[]>([
       </div>
     </div>
 
-    <div ref="chatContainer" class="flex-1 flex flex-col gap-3 px-4 pt-4 overflow-y-auto">
+    <div ref="chatContainer" class="flex flex-col gap-3 px-4 pt-4 overflow-y-auto h-[calc(100dvh-260px)] pb-10">
       <div
           v-for="(msg, index) in messages"
           :key="index"
@@ -37,6 +36,35 @@ const messages = ref<Message[]>([
                                      : 'self-start bg-[#655D5A] text-white rounded-3xl rounded-bl-none px-4 py-2 max-w-[70%]'"
       >
         <p>{{ msg.text }}</p>
+      </div>
+
+      <div class="self-end flex flex-col items-center justify-center gap-2">
+        <div class="relative group w-40 cursor-pointer">
+
+          <!-- Halo doux -->
+          <div class="absolute inset-0 rounded-3xl bg-gradient-to-r from-[#A37968] to-[#c6473f]
+        opacity-20 blur-xl group-hover:opacity-40 group-hover:blur-2xl
+        transition-all duration-500"></div>
+
+          <!-- Liseré animé fin -->
+          <div class="absolute inset-0 rounded-3xl p-[1.5px] bg-gradient-to-r
+        from-[#A37968] to-[#add399]
+        opacity-60 group-hover:opacity-100 transition-all duration-300"></div>
+
+          <!-- Contenu -->
+          <NuxtLink :to="{ name: 'ar' }">
+            <div class="relative bg-white rounded-3xl p-6 shadow-lg group-hover:shadow-xl
+                transition-all duration-300 group-hover:scale-[1.03]">
+                <img src="~/assets/tatoo.png" alt="">
+            </div>
+          </NuxtLink>
+        </div>
+
+        <p class="text-xs w-30 text-center font-light text-slate-600">Clique pour l'afficher en réalité augmenté</p>
+      </div>
+
+      <div class="self-end bg-[#A37968] text-white rounded-3xl rounded-br-none px-4 py-2 max-w-[70%]">
+        <p>Voilà le tatouage</p>
       </div>
     </div>
 
