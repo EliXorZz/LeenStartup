@@ -16,10 +16,12 @@
       <Icon class="text-xl" name="custom:home-icon" />
       <p class="text-xs font-light">Accueil</p>
     </div>
-    <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-20">
-      <Icon class="text-xl" name="custom:chat-icon" />
-      <p class="text-xs font-light">Messages</p>
-    </div>
+    <NuxtLink :to="{ name: 'messages' }">
+      <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-20">
+        <Icon class="text-xl" name="custom:chat-icon" />
+        <p class="text-xs font-light">Messages</p>
+      </div>
+    </NuxtLink>
     <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-20">
       <Icon class="text-xl" name="custom:profile-icon" />
       <p class="text-xs font-light">Profile</p>

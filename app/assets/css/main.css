@@ -4,3 +4,7 @@
 :root {
   --ui-primary: #A37968;
 }
+
+body {
+  background-color: #FDFDF2;
+}
