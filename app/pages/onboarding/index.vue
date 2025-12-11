@@ -17,7 +17,6 @@ const selected = ref("particulier")
 
 <template>
   <div class="w-full min-h-dvh bg-gray-50 flex flex-col">
-  {{ selected }}
     <div class="flex flex-col items-center justify-center min-h-dvh">
       <div class="w-40">
         <img class="object-contain" src="~/assets/logo.svg"/>
