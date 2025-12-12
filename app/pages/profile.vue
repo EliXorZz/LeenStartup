@@ -63,11 +63,21 @@ definePageMeta({
 
         <div class="mt-6 grid grid-cols-3 gap-1">
           <div v-for="i in 12" :key="i" class="w-full aspect-square overflow-hidden">
-            <img
-                src="~/assets/galerie.jpg"
-                alt=""
-                class="w-full h-full object-cover"
-            />
+            <UModal>
+              <img
+                  src="~/assets/galerie.jpg"
+                  alt=""
+                  class="w-full h-full object-cover"
+              />
+
+              <template #content>
+                <img
+                    src="~/assets/galerie.jpg"
+                    alt=""
+                    class="w-full h-full object-cover"
+                />
+              </template>
+            </UModal>
           </div>
         </div>
       </div>
