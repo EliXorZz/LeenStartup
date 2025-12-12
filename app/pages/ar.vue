@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import * as THREE from 'three'
 import { Pose } from '@mediapipe/pose'
-import { onMounted, onBeforeUnmount, ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 
+// --- 1. ÉTAT RÉACTIF (Remplace document.getElementById) ---
+const containerRef = ref<HTMLDivElement | null>(null)
+// Au lieu de modifier info.textContent, on modifie cette variable :
+const infoText = ref('Chargement...')
+const showStartButton = ref(false)
+const showSwitchCamera = ref(false)
+const startButtonText = ref('Démarrer AR')
 const openDrawer = ref(false)
 
 const router = useRouter()
@@ -10,8 +18,31 @@ function onBack() {
   router.back()
 }
 
+// --- 2. VARIABLES GLOBALES (Three.js & Logic) ---
 let stopPoseTracking: (() => void) | null = null;
+let scene: THREE.Scene
+let camera: THREE.PerspectiveCamera
+let renderer: THREE.WebGLRenderer
+let reticle: THREE.Mesh
+let hitTestSource: XRHitTestSource | null = null
+let hitTestSourceRequested = false
+let tattooTexture: THREE.Texture
+let tattooMesh: THREE.Mesh | null = null
+let tattooCurve: THREE.CatmullRomCurve3 | null = null
+let currentStream: MediaStream | null = null
+let videoElement: HTMLVideoElement | null = null
+let rafId: number | null = null
 
+// Paramètres Tatouage
+let tubeRadiusDefault = 0.09;
+let tubeFactor = 0.5;
+let tubeMin = 0.03;
+let tubeMax = 0.28;
+let heightMultiplier = 0.9;
+let tattooAspect = 1
+let currentFacingMode: 'environment' | 'user' = 'user'
+
+// --- 3. MEDIAPIPE LOGIC ---
 async function setupPoseTracking(video: HTMLVideoElement, onPose: (landmarks: any) => void) {
   const pose = new Pose({
     locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
@@ -25,182 +56,51 @@ async function setupPoseTracking(video: HTMLVideoElement, onPose: (landmarks: an
   });
 
   let rightArmStableCount = 0;
-  let leftArmStableCount = 0;
-  const VISIBILITY_THRESHOLD = 0.6;
   const ARM_VISIBILITY_AVG = 0.65;
   const ARM_CONSEC_FRAMES = 3;
 
   pose.onResults((results) => {
-    if (results.poseLandmarks) {
-      onPose(results.poseLandmarks);
+    if (!results.poseLandmarks) return;
+    onPose(results.poseLandmarks);
 
-      const landmarks = results.poseLandmarks as Array<any>;
-      const visible = (pt: any) => pt && (pt.visibility === undefined || pt.visibility >= VISIBILITY_THRESHOLD);
+    // Détection simplifiée pour l'exemple (Bras Droit)
+    const lm = results.poseLandmarks as any[];
+    const rS = lm[12], rE = lm[14], rW = lm[16];
 
-      const rightShoulder = landmarks[12];
-      const rightElbow = landmarks[14];
-      const rightWrist = landmarks[16];
-      const leftShoulder = landmarks[11];
-      const leftElbow = landmarks[13];
-      const leftWrist = landmarks[15];
+    // Calcul moyenne visibilité
+    if(rS && rE && rW) {
+      const avg = ((rS.visibility||0) + (rE.visibility||0) + (rW.visibility||0)) / 3;
+      if(avg >= ARM_VISIBILITY_AVG) rightArmStableCount++;
+      else rightArmStableCount = 0;
 
-      const dispatchLandmark = (name: string, index: number, landmark: any) => {
-        try {
-          window.dispatchEvent(new CustomEvent('pose:landmark', { detail: { name, index, landmark } }));
-        } catch (e) {
-          // Fallback
-        }
-      };
-
-      if (visible(rightShoulder)) dispatchLandmark('right_shoulder', 12, rightShoulder);
-      if (visible(rightElbow)) dispatchLandmark('right_elbow', 14, rightElbow);
-      if (visible(rightWrist)) dispatchLandmark('right_wrist', 16, rightWrist);
-      if (visible(leftShoulder)) dispatchLandmark('left_shoulder', 11, leftShoulder);
-      if (visible(leftElbow)) dispatchLandmark('left_elbow', 13, leftElbow);
-      if (visible(leftWrist)) dispatchLandmark('left_wrist', 15, leftWrist);
-
-      const avgVis = (a: any, b: any, c: any) => {
-        const va = (a && typeof a.visibility === 'number') ? a.visibility : 0;
-        const vb = (b && typeof b.visibility === 'number') ? b.visibility : 0;
-        const vc = (c && typeof c.visibility === 'number') ? c.visibility : 0;
-        return (va + vb + vc) / 3;
-      };
-
-      // Right arm check
-      if (rightShoulder && rightElbow && rightWrist) {
-        if (avgVis(rightShoulder, rightElbow, rightWrist) >= ARM_VISIBILITY_AVG) rightArmStableCount++;
-        else rightArmStableCount = 0;
-
-        if (rightArmStableCount >= ARM_CONSEC_FRAMES) {
-          window.dispatchEvent(new CustomEvent('pose:arm', { detail: { side: 'right', landmarks: { shoulder: rightShoulder, elbow: rightElbow, wrist: rightWrist } } }));
-          rightArmStableCount = 0;
-        }
-      }
-
-      // Left arm check
-      if (leftShoulder && leftElbow && leftWrist) {
-        if (avgVis(leftShoulder, leftElbow, leftWrist) >= ARM_VISIBILITY_AVG) leftArmStableCount++;
-        else leftArmStableCount = 0;
-
-        if (leftArmStableCount >= ARM_CONSEC_FRAMES) {
-          window.dispatchEvent(new CustomEvent('pose:arm', { detail: { side: 'left', landmarks: { shoulder: leftShoulder, elbow: leftElbow, wrist: leftWrist } } }));
-          leftArmStableCount = 0;
-        }
+      if(rightArmStableCount >= ARM_CONSEC_FRAMES) {
+        infoText.value = "Bras détecté (Droit)";
+        rightArmStableCount = 0;
+        // Reset message après 2s
+        setTimeout(() => {
+          if(infoText.value.includes('Bras')) infoText.value = 'Tapez pour placer le tattoo';
+        }, 2000);
       }
     }
   });
 
   let running = true;
-  let rafId: number | null = null;
+  async function detect() {
+    if (!running) return;
+    if (video.readyState >= 2) {
+      try { await pose.send({ image: video }); } catch (e) { console.warn(e); }
+    }
+    requestAnimationFrame(detect);
+  }
+  detect();
 
   stopPoseTracking = () => {
     running = false;
-    if (rafId !== null) cancelAnimationFrame(rafId);
-    try { (pose as any).close?.(); } catch (e) {}
-    stopPoseTracking = null;
+    pose.close();
   };
-
-  async function detect() {
-    if (!running) return;
-    if (video.readyState >= 2) { // Vérifier que la vidéo est prête
-      try { await pose.send({ image: video }); }
-      catch (e) { console.warn('pose.send error', e); }
-    }
-    rafId = requestAnimationFrame(detect) as unknown as number;
-  }
-  detect();
 }
 
-// --- 2. VARIABLES THREE.JS & ETAT ---
-let scene: THREE.Scene
-let camera: THREE.PerspectiveCamera
-let renderer: THREE.WebGLRenderer
-let reticle: THREE.Mesh
-let hitTestSource: XRHitTestSource | null = null
-let hitTestSourceRequested = false
-let tattooTexture: THREE.Texture
-let tattooMesh: THREE.Mesh | null = null
-let tattooCurve: THREE.CatmullRomCurve3 | null = null
-let currentFacingMode: 'environment' | 'user' = 'user'
-let currentStream: MediaStream | null = null
-let videoElement: HTMLVideoElement | null = null
-
-// Variables de configuration
-let tubeRadiusDefault = 0.09;
-let tubeFactor = 0.5;
-let tubeMin = 0.03;
-let tubeMax = 0.28;
-let heightMultiplier = 0.9;
-let heightMin = 0.06;
-let heightMax = 0.65;
-let alphaTestVal = 0.03;
-let seamOffset = 0;
-let showWireframe = false;
-let blendMode: 'Normal' | 'Multiply' = 'Normal';
-let manualDeviceId: string | null = null;
-let tattooReferenceProj: THREE.Vector3 | null = null;
-let appliedTubeRadius = 0.09;
-let tattooAspect = 1
-let tattooTextureTube: THREE.Texture | null = null
-
-const PREVIEW_OPACITY = 0.55
-const LOCKED_OPACITY = 1.0
-
-// Références DOM (via Vue refs pour la sécurité)
-const containerRef = ref<HTMLElement | null>(null)
-const infoRef = ref<HTMLElement | null>(null)
-const startButtonRef = ref<HTMLButtonElement | null>(null)
-const switchButtonRef = ref<HTMLButtonElement | null>(null)
-
-// --- 3. FONCTIONS UTILITAIRES ---
-
-function landmarkToWorld(landmark: any, elbow?: any, wrist?: any) {
-  if (!camera) return new THREE.Vector3();
-  const ndcX = (landmark.x ?? 0) * 2 - 1;
-  const ndcY = -((landmark.y ?? 0) * 2 - 1);
-  const mid = new THREE.Vector3(ndcX, ndcY, 0.5);
-  mid.unproject(camera);
-  const dir = mid.clone().sub(camera.position).normalize();
-  let baseDistance = 1.6;
-
-  if (elbow && wrist) {
-    const ed = new THREE.Vector3((elbow.x ?? 0) * 2 - 1, -((elbow.y ?? 0) * 2 - 1), 0.5);
-    const wd = new THREE.Vector3((wrist.x ?? 0) * 2 - 1, -((wrist.y ?? 0) * 2 - 1), 0.5);
-    ed.unproject(camera);
-    wd.unproject(camera);
-    const forearmWorld = ed.distanceTo(wd);
-    if (forearmWorld > 0) {
-      const targetForearm = 0.35;
-      const factor = targetForearm / forearmWorld;
-      baseDistance = THREE.MathUtils.clamp(baseDistance * factor, 0.6, 4.0);
-    }
-  }
-  return camera.position.clone().add(dir.multiplyScalar(baseDistance));
-}
-
-function orientPlaneAlongForearm(plane: THREE.Object3D, wristLandmark: any, elbowLandmark: any) {
-  if (!camera || !wristLandmark || !elbowLandmark) return;
-  const elbowWorld = landmarkToWorld(elbowLandmark, elbowLandmark, wristLandmark);
-  const wristWorld = landmarkToWorld(wristLandmark, elbowLandmark, wristLandmark);
-  const forearm = elbowWorld.clone().sub(wristWorld).normalize();
-
-  const pos = plane.position.clone();
-  const forward = camera.position.clone().sub(pos).normalize();
-  const proj = forearm.clone().sub(forward.clone().multiplyScalar(forearm.dot(forward)));
-  let up = proj.length() > 0.0001 ? proj.normalize() : new THREE.Vector3(0, 1, 0);
-  const right = new THREE.Vector3().crossVectors(up, forward).normalize();
-  up = new THREE.Vector3().crossVectors(forward, right).normalize();
-
-  const m = new THREE.Matrix4();
-  m.makeBasis(right, up, forward);
-  plane.quaternion.setFromRotationMatrix(m);
-
-  const worldUp = new THREE.Vector3().setFromMatrixColumn(m, 1);
-  if (worldUp.dot(forearm) < 0) {
-    plane.rotateOnAxis(forward, Math.PI);
-  }
-}
-
+// --- 4. THREE.JS HELPERS ---
 function swapGeometryUVs(geom: THREE.BufferGeometry) {
   const uvAttr = geom.getAttribute('uv');
   if (!uvAttr) return;
@@ -216,106 +116,121 @@ function swapGeometryUVs(geom: THREE.BufferGeometry) {
   uvAttr.needsUpdate = true;
 }
 
-function animateMaterialOpacity(material: THREE.Material | THREE.Material[] | null, to: number, duration = 300) {
-  if (!material) return;
-  const mats = Array.isArray(material) ? material : [material];
-  mats.forEach((m) => {
-    const mat = m as THREE.MeshBasicMaterial;
-    if (typeof (mat as any).opacity !== 'number') return;
-    const start = (mat.opacity !== undefined) ? mat.opacity : 1;
-    const delta = to - start;
-    const startTime = Date.now();
-    function step() {
-      const elapsed = Date.now() - startTime;
-      const t = Math.min(elapsed / duration, 1);
-      mat.opacity = start + delta * t;
-      mat.needsUpdate = true;
-      if (t < 1) requestAnimationFrame(step);
-    }
-    step();
-  });
+function landmarkToWorld(landmark: any) {
+  if (!camera) return new THREE.Vector3();
+  const ndcX = (landmark.x * 2) - 1;
+  const ndcY = -(landmark.y * 2) + 1;
+  const vec = new THREE.Vector3(ndcX, ndcY, 0.5);
+  vec.unproject(camera);
+  const dir = vec.sub(camera.position).normalize();
+  return camera.position.clone().add(dir.multiplyScalar(1.5));
 }
 
-// --- 4. INITIALISATION THREE.JS ---
+function updateTattooFromPose(landmarks: any) {
+  if (!tattooMesh || !camera) return;
+  // Utilisation poignet/coude (indices 14/16 pour droit, 13/15 gauche)
+  const elbow = landmarks[14] || landmarks[13];
+  const wrist = landmarks[16] || landmarks[15];
 
-function init() {
-  const container = containerRef.value;
-  if (!container) {
-    console.error("Container introuvable !");
+  if (!elbow || !wrist || (elbow.visibility < 0.5)) {
+    tattooMesh.visible = false;
     return;
   }
 
-  // Scène
+  // Construction Courbe
+  const p1 = landmarkToWorld(elbow);
+  const p2 = landmarkToWorld(wrist);
+  tattooCurve = new THREE.CatmullRomCurve3([p1, p2]);
+
+  const len = p1.distanceTo(p2);
+  const radius = Math.max(tubeMin, Math.min(tubeMax, len * tubeFactor));
+
+  const geo = new THREE.TubeGeometry(tattooCurve, 16, radius, 16, false);
+  swapGeometryUVs(geo);
+
+  tattooMesh.geometry.dispose();
+  tattooMesh.geometry = geo;
+  tattooMesh.visible = true;
+}
+
+// --- 5. INITIALISATION ---
+function init() {
+  if (!containerRef.value) return;
+
   scene = new THREE.Scene()
-
-  // Caméra
   camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20)
-  camera.position.z = 2 // Important pour voir quelque chose au début
-
-  // Lumières
   const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1)
   light.position.set(0.5, 1, 0.25)
   scene.add(light)
 
-  // Renderer
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.setSize(window.innerWidth, window.innerHeight)
-  renderer.setClearColor(0x000000, 0); // Transparent
   renderer.xr.enabled = true
+  // Fond transparent
+  renderer.setClearColor(0x000000, 0);
 
-  // Style important pour la superposition
+  // Style CSS pour superposition
   renderer.domElement.style.position = 'absolute';
   renderer.domElement.style.top = '0';
   renderer.domElement.style.left = '0';
   renderer.domElement.style.zIndex = '10'; // Au dessus de la vidéo
 
-  container.appendChild(renderer.domElement)
+  // Nettoyage container et ajout
+  while(containerRef.value.firstChild) containerRef.value.removeChild(containerRef.value.firstChild);
 
-  // Chargement texture
-  const textureLoader = new THREE.TextureLoader()
-  tattooTexture = textureLoader.load('/tattoo.png', (tex) => {
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.needsUpdate = true;
-    const img = tex.image;
-    if (img && img.width && img.height) tattooAspect = img.width / img.height;
+  // Création vidéo manuelle
+  videoElement = document.createElement('video');
+  videoElement.autoplay = true;
+  videoElement.playsInline = true;
+  videoElement.muted = true;
+  videoElement.style.position = 'absolute';
+  videoElement.style.width = '100%';
+  videoElement.style.height = '100%';
+  videoElement.style.objectFit = 'cover';
+  videoElement.style.zIndex = '0'; // Au fond
 
-    // Version tube
-    try {
-      const tubeTex = tex.clone();
-      tubeTex.wrapS = THREE.ClampToEdgeWrapping;
-      tubeTex.wrapT = THREE.ClampToEdgeWrapping;
-      (tubeTex as any).needsUpdate = true;
-      tattooTextureTube = tubeTex;
-    } catch(e) {}
+  containerRef.value.appendChild(videoElement);
+  containerRef.value.appendChild(renderer.domElement);
+
+  // Chargement Texture
+  const loader = new THREE.TextureLoader();
+  tattooTexture = loader.load('/tattoo.png', (t) => {
+    t.colorSpace = THREE.SRGBColorSpace;
+    if(t.image) tattooAspect = t.image.width / t.image.height;
   });
 
+  // Mesh initial
+  const path = new THREE.CatmullRomCurve3([new THREE.Vector3(0,0,0), new THREE.Vector3(0,-0.1,0)]);
+  const geo = new THREE.TubeGeometry(path, 4, 0.05, 8, false);
+  swapGeometryUVs(geo);
+  const mat = new THREE.MeshBasicMaterial({ map: tattooTexture, transparent: true, opacity: 0.8 });
+  tattooMesh = new THREE.Mesh(geo, mat);
+  tattooMesh.visible = false;
+  scene.add(tattooMesh);
+
   // Reticle
-  const geometry = new THREE.RingGeometry(0.15, 0.2, 32).rotateX(-Math.PI / 2)
-  const material = new THREE.MeshBasicMaterial({ color: 0xffffff })
-  reticle = new THREE.Mesh(geometry, material)
-  reticle.matrixAutoUpdate = false
-  reticle.visible = false
-  scene.add(reticle)
+  const rGeo = new THREE.RingGeometry(0.15, 0.2, 32).rotateX(-Math.PI/2);
+  const rMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  reticle = new THREE.Mesh(rGeo, rMat);
+  reticle.visible = false;
+  scene.add(reticle);
 
-  window.addEventListener('resize', onWindowResize)
+  window.addEventListener('resize', onWindowResize);
 
-  // Vérification support WebXR
+  // Vérification XR après que tout est chargé
   checkXRSupport();
 }
 
-// --- 5. LOGIQUE CAMERA & UPDATE ---
-
-function updateTattooFromPose(landmarks: any) {
-  // Votre logique de mise à jour du mesh (simplifiée pour l'affichage)
-  // ... (Code original conservé, voir intégration plus bas dans startCameraMode)
-}
+// --- 6. LOGIQUE BOUTONS & CAMERA ---
 
 function checkXRSupport() {
   if ('xr' in navigator && (navigator as any).xr) {
     (navigator as any).xr.isSessionSupported('immersive-ar').then((supported: boolean) => {
-      if (supported && startButtonRef.value) {
-        if(infoRef.value) infoRef.value.textContent = 'AR prêt !'
+      if (supported) {
+        infoText.value = 'AR prêt !'
+        showStartButton.value = true
+        startButtonText.value = 'Démarrer AR'
       } else {
         startFallbackMode()
       }
@@ -326,204 +241,177 @@ function checkXRSupport() {
 }
 
 function startFallbackMode() {
-  if(infoRef.value) infoRef.value.textContent = 'Mode Caméra (WebXR indisponible)'
-  if(startButtonRef.value) {
-    // Suppression des anciens listeners pour éviter les doublons
-    const newBtn = startButtonRef.value.cloneNode(true) as HTMLButtonElement;
-    startButtonRef.value.addEventListener('click', () => startCameraMode('user'));
-  }
+  infoText.value = 'Mode caméra simple'
+  showStartButton.value = true
+  startButtonText.value = 'Démarrer la caméra'
 }
 
-// Gestion des caméras
-async function getDeviceIdForFacingMode(facingMode: 'environment' | 'user'): Promise<string | undefined> {
-  if (!navigator.mediaDevices?.enumerateDevices) return undefined;
-  try {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoDevices = devices.filter(d => d.kind === 'videoinput');
-    // Heuristique simple
-    const keyword = facingMode === 'user' ? /front|user|avant/i : /back|environment|arrière/i;
-    const match = videoDevices.find(d => keyword.test(d.label));
-    return match?.deviceId;
-  } catch(e) { return undefined; }
+function handleStart() {
+  if(startButtonText.value === 'Démarrer AR') startAR();
+  else startCameraMode('user');
 }
 
-async function startCameraMode(facingMode: 'environment' | 'user' = 'user') {
-  if(infoRef.value) infoRef.value.textContent = 'Accès caméra...';
+function handleSwitch() {
+  const mode = currentFacingMode === 'environment' ? 'user' : 'environment';
+  startCameraMode(mode);
+}
 
-  // Cleanup
-  if (currentStream) currentStream.getTracks().forEach(t => t.stop());
-  if (videoElement) {
-    videoElement.pause();
-    videoElement.srcObject = null;
-  }
+async function startCameraMode(mode: 'user'|'environment') {
+  infoText.value = "Accès caméra...";
+  if(currentStream) currentStream.getTracks().forEach(t => t.stop());
 
   try {
-    let stream;
-    const deviceId = await getDeviceIdForFacingMode(facingMode);
-    const constraints: MediaStreamConstraints = {
-      video: {
-        deviceId: deviceId ? { exact: deviceId } : undefined,
-        facingMode: !deviceId ? facingMode : undefined,
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      }
-    };
-
-    stream = await navigator.mediaDevices.getUserMedia(constraints);
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: mode, width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
     currentStream = stream;
-    currentFacingMode = facingMode;
+    currentFacingMode = mode;
 
-    // Création élément vidéo
-    if (!videoElement) {
-      videoElement = document.createElement('video');
-      videoElement.setAttribute('autoplay', '');
-      videoElement.setAttribute('muted', '');
-      videoElement.setAttribute('playsinline', '');
-      videoElement.style.position = 'absolute';
-      videoElement.style.top = '0';
-      videoElement.style.left = '0';
-      videoElement.style.width = '100%';
-      videoElement.style.height = '100%';
-      videoElement.style.objectFit = 'cover';
-      videoElement.style.zIndex = '1'; // Derrière le canvas
-      containerRef.value?.prepend(videoElement); // Prepend pour être sûr qu'il est derrière le canvas
+    if(videoElement) {
+      videoElement.srcObject = stream;
+      videoElement.onloadedmetadata = () => videoElement!.play();
+      // Lancer le tracking
+      setupPoseTracking(videoElement, updateTattooFromPose);
     }
 
-    videoElement.srcObject = stream;
-    await videoElement.play();
+    infoText.value = "Caméra active";
+    showStartButton.value = false;
+    showSwitchCamera.value = true;
+    animate();
+  } catch(e: any) {
+    infoText.value = "Erreur: " + e.message;
+  }
+}
 
-    // Démarrage Tracking
-    if (stopPoseTracking) stopPoseTracking();
+function startAR() {
+  const sessionInit = { requiredFeatures: ['hit-test'], optionalFeatures: ['dom-overlay'], domOverlay: { root: document.body } };
+  (navigator as any).xr.requestSession('immersive-ar', sessionInit).then(onSessionStarted);
+}
 
-    let poseTattoo: THREE.Mesh | null = null;
-    let locked = false;
+function onSessionStarted(session: XRSession) {
+  session.addEventListener('end', onSessionEnded);
+  renderer.xr.setSession(session);
+  showStartButton.value = false;
+  infoText.value = 'Tapez pour placer';
+  session.addEventListener('select', onSelect);
+  renderer.setAnimationLoop(xrRender);
+}
 
-    setupPoseTracking(videoElement, (landmarks) => {
-      // Logique simplifiée de mise à jour visuelle pour le débuggage
-      if(locked) return;
+function onSessionEnded() {
+  hitTestSourceRequested = false;
+  hitTestSource = null;
+  showStartButton.value = true;
+  infoText.value = 'Session terminée';
+  renderer.setAnimationLoop(null);
+}
 
-      const wrist = landmarks[16] || landmarks[15];
-      const elbow = landmarks[14] || landmarks[13];
+function animate() {
+  renderer.render(scene, camera);
+  rafId = requestAnimationFrame(animate);
+}
 
-      if (wrist && elbow) {
-        if (!poseTattoo) {
-          const geo = new THREE.PlaneGeometry(1, 1);
-          const mat = new THREE.MeshBasicMaterial({
-            map: tattooTexture,
-            transparent: true,
-            opacity: 0.8,
-            side: THREE.DoubleSide
-          });
-          poseTattoo = new THREE.Mesh(geo, mat);
-          scene.add(poseTattoo);
-        }
-
-        // Positionner grossièrement
-        const p1 = landmarkToWorld(wrist);
-        const p2 = landmarkToWorld(elbow);
-        const center = p1.clone().add(p2).multiplyScalar(0.5);
-
-        poseTattoo.position.copy(center);
-        poseTattoo.lookAt(camera.position);
-        poseTattoo.scale.set(0.2, 0.2, 0.2); // Taille fixe pour test
-        poseTattoo.visible = true;
+function xrRender(t: number, frame: XRFrame) {
+  if(frame) {
+    const session = renderer.xr.getSession();
+    if(!hitTestSourceRequested && session) {
+      session.requestReferenceSpace('viewer').then((rs:any) => {
+        session.requestHitTestSource?.({space:rs})?.then((s:any)=>hitTestSource=s);
+      });
+      hitTestSourceRequested = true;
+    }
+    if(hitTestSource) {
+      const rs = renderer.xr.getReferenceSpace();
+      if(rs) {
+        const hits = frame.getHitTestResults(hitTestSource);
+        if(hits.length>0) {
+          const pose = hits[0].getPose(rs);
+          if(pose) {
+            reticle.visible = true;
+            reticle.matrix.fromArray(pose.transform.matrix);
+          }
+        } else reticle.visible = false;
       }
-    });
+    }
+  }
+  renderer.render(scene, camera);
+}
 
-    if(infoRef.value) infoRef.value.textContent = 'Caméra active. Levez le bras.';
-
-    // Boucle de rendu
-    renderer.setAnimationLoop(() => {
-      renderer.render(scene, camera);
-    });
-
-  } catch (err: any) {
-    console.error(err);
-    if(infoRef.value) infoRef.value.textContent = 'Erreur caméra: ' + err.message;
+function onSelect() {
+  if(reticle.visible && tattooMesh) {
+    const clone = tattooMesh.clone();
+    clone.position.setFromMatrixPosition(reticle.matrix);
+    clone.visible = true;
+    clone.scale.set(0.1, 0.1, 0.1);
+    scene.add(clone);
   }
 }
 
 function onWindowResize() {
-  if (!camera || !renderer) return;
-  camera.aspect = window.innerWidth / window.innerHeight
-  camera.updateProjectionMatrix()
-  renderer.setSize(window.innerWidth, window.innerHeight)
+  if(!camera || !renderer) return;
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-function switchCamera() {
-  const newMode = currentFacingMode === 'user' ? 'environment' : 'user';
-  startCameraMode(newMode);
-}
-
-// --- 6. LIFECYCLE HOOKS ---
-
+// --- 7. LIFECYCLE VUE ---
 onMounted(() => {
-  console.log("Composant monté, initialisation...");
+  // C'EST ICI QU'ON LANCE TOUT (quand le DOM existe)
   init();
-
-  // Attacher l'événement pour démarrer AR (si supporté)
-  if(startButtonRef.value) {
-    startButtonRef.value.addEventListener('click', () => {
-      startCameraMode('user');
-    });
-  }
-});
+})
 
 onBeforeUnmount(() => {
-  if (stopPoseTracking) stopPoseTracking();
-  if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+  if(stopPoseTracking) stopPoseTracking();
+  if(rafId) cancelAnimationFrame(rafId);
+  if(currentStream) currentStream.getTracks().forEach(t => t.stop());
   window.removeEventListener('resize', onWindowResize);
-  if (renderer) renderer.dispose();
-});
+})
 
 </script>
 
 <template>
   <div class="ar-page">
+    <div ref="containerRef" id="container"></div>
+
     <div id="ui-layer">
-      <div ref="infoRef" id="info">Chargement...</div>
+      <div id="info">{{ infoText }}<br><span class="text-xs text-yellow-300">v2025.12.10</span></div>
     </div>
 
-    <div ref="containerRef" id="container"></div>
+    <button v-if="showStartButton" @click="handleStart" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white text-black px-6 py-3 rounded-full font-bold shadow-xl">
+      {{ startButtonText }}
+    </button>
+
+    <div v-if="showSwitchCamera" @click="handleSwitch" class="fixed top-20 right-5 z-50 bg-white/80 p-3 rounded-full cursor-pointer">
+      🔄
+    </div>
 
     <div class="z-10 w-full p-3 fixed bottom-0">
       <div class="flex justify-around gap-16 text-white rounded-full px-3 glass">
+
         <UDrawer v-model:open="openDrawer">
           <template #content>
             <div class="flex flex-col justify-center items-center w-full pt-6">
-              <h1>Sélectionner un tatouage dans la bibliothèque</h1>
-
-              <!-- wrapper pour ne pas casser le scroll -->
+              <h1 class="text-black mb-4">Bibliothèque</h1>
               <div class="w-full overflow-hidden">
                 <div class="flex gap-4 overflow-x-auto whitespace-nowrap py-10 px-10 scroll-smooth">
-                  <div
-                      v-for="i in 10"
-                      :key="i"
-                      class="w-40 h-40 p-4 rounded-2xl overflow-hidden shrink-0 bg-gray-100 inline-block"
-                      @click="openDrawer = false"
-                  >
-                    <img
-                        src="/tattoo.png"
-                        alt=""
-                        class="w-full h-full object-cover"
-                    />
+                  <div v-for="i in 5" :key="i" class="w-40 h-40 bg-gray-200 rounded-xl shrink-0" @click="openDrawer=false">
                   </div>
                 </div>
               </div>
-
             </div>
           </template>
         </UDrawer>
 
         <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-20" @click="openDrawer = true">
-          <Icon class="text-xl" name="custom:design-icon" />
+          <UIcon class="text-xl" name="i-heroicons-photo" />
           <p class="text-xs font-light">Galerie</p>
         </div>
-        <div ref="startButtonRef" class="cursor-pointer absolute -translate-y-10 w-20 h-20 rounded-full bg-white border-2 border-gray-400 flex justify-center items-center">
-          <Icon size="50" name="custom:ra-icon-black" class="hover:opacity-65" />
+
+        <div class="absolute -translate-y-10 w-20 h-20 rounded-full bg-white border-4 border-gray-300 flex justify-center items-center">
+          <div class="w-16 h-16 bg-gray-100 rounded-full border-2 border-black"></div>
         </div>
+
         <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-20" @click="onBack">
-          <UIcon class="text-xl" name="lucide:arrow-left" />
+          <UIcon class="text-xl" name="i-heroicons-arrow-left" />
           <p class="text-xs font-light">Retour</p>
         </div>
       </div>
@@ -554,11 +442,10 @@ onBeforeUnmount(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 20; /* Au-dessus du canvas 3D */
-  pointer-events: none; /* Laisser passer les clics vers la scène 3D */
+  z-index: 20;
+  pointer-events: none;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   padding: 20px;
 }
 
@@ -573,26 +460,8 @@ onBeforeUnmount(() => {
   margin-top: 20px;
 }
 
-.controls {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 40px;
-  pointer-events: auto;
-}
-
-button {
-  background: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 24px;
-  font-weight: bold;
-  font-size: 16px;
-  cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-}
-
-#switchCamera {
-  display: none; /* Masqué au départ */
+.glass {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
 }
 </style>
