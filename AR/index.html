@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BloomInk AR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background: #000;
+    }
+    #container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    #info {
+      position: fixed;
+      top: 2vw;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      background: rgba(0,0,0,0.7);
+      padding: 3vw 6vw;
+      border-radius: 3vw;
+      text-align: center;
+      z-index: 1000;
+      font-size: 5vw;
+      max-width: 90vw;
+      box-sizing: border-box;
+    }
+    #startAR {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 5vw 10vw;
+      font-size: 6vw;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5vw;
+      cursor: pointer;
+      z-index: 1000;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      max-width: 80vw;
+    }
+    #startAR:active {
+      background: #45a049;
+    }
+    #startAR:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    #switchCamera {
+      position: fixed;
+      bottom: 5vw;
+      right: 5vw;
+      width: 14vw;
+      height: 14vw;
+      min-width: 60px;
+      min-height: 60px;
+      background: rgba(255,255,255,0.95);
+      border: 3px solid #333;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 10000;
+      font-size: 8vw;
+      display: none;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      -webkit-tap-highlight-color: transparent;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      line-height: 14vw;
+    }
+    #switchCamera:active {
+      background: rgba(200,200,200,0.95);
+    }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  <div id="info">Chargement...<br><span style="font-size:3vw;color:#ff0;">v2025-12-10</span></div>
+  <button id="startAR" style="display:block;">Démarrer AR</button>
+  <button id="switchCamera" title="Changer de caméra" style="display:block;">🔄</button>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
