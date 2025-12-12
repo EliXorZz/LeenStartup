@@ -8,9 +8,28 @@ const categories = [
 	{ label: 'Cover', img: '/home/cover.png' },
 ] as const;
 
+const featuredArtist = {
+	name: 'Léa Martin',
+	description: 'Gris & Bio-ink, textures et recouvrements',
+	rating: '4.9',
+	reviews: 420,
+	avatar: 'https://i.pravatar.cc/150?img=12',
+};
+
+const favoriteArtists = [
+	{ name: 'Léa', avatar: 'https://i.pravatar.cc/150?img=1' },
+	{ name: 'Noah', avatar: 'https://i.pravatar.cc/150?img=2' },
+	{ name: 'Maya', avatar: 'https://i.pravatar.cc/150?img=3' },
+	{ name: 'Lucas', avatar: 'https://i.pravatar.cc/150?img=4' },
+	{ name: 'Inès', avatar: 'https://i.pravatar.cc/150?img=5' },
+	{ name: 'Sofiane', avatar: 'https://i.pravatar.cc/150?img=6' },
+	{ name: 'Zoé', avatar: 'https://i.pravatar.cc/150?img=7' },
+	{ name: 'Hugo', avatar: 'https://i.pravatar.cc/150?img=8' },
+];
+
 definePageMeta({
-  layout: 'user',
-})
+	layout: 'user',
+});
 </script>
 
 <template>
@@ -69,18 +88,18 @@ definePageMeta({
 				<div class="px-4 md:px-8">
 					<div class="mt-6">
 						<div class="bg-white/75 rounded-xl shadow p-4 flex items-center gap-4">
-              <div class="w-20">
-                <UAvatar class="w-full h-full" size="xl" src="https://github.com/benjamincanac.png" />
-              </div>
+							<div class="w-20">
+								<UAvatar class="w-full h-full" size="xl" :src="featuredArtist.avatar" />
+							</div>
 							<div class="flex-1">
 								<div class="flex items-center justify-between">
 									<div>
-										<div class="font-semibold">Cyrilan G</div>
-										<div class="text-xs text-gray-500 mt-0.5">Gris & Bio-ink, textures et recouvrements</div>
+										<div class="font-semibold">{{ featuredArtist.name }}</div>
+										<div class="text-xs text-gray-500 mt-0.5">{{ featuredArtist.description }}</div>
 									</div>
 									<div class="text-right">
-										<div class="text-sm font-medium">4.8</div>
-										<div class="text-xs text-gray-400">(320)</div>
+										<div class="text-sm font-medium">{{ featuredArtist.rating }}</div>
+										<div class="text-xs text-gray-400">({{ featuredArtist.reviews }})</div>
 									</div>
 								</div>
 								<div class="mt-3 flex items-center gap-3">
@@ -100,16 +119,16 @@ definePageMeta({
 				<div class="px-4 md:px-8 text-white mt-6">
 					<h3 class="text-sm mb-3 font-bold">Les tatoueurs favoris	</h3>
 					<div class="flex gap-1 overflow-x-auto pb-2">
-					<template v-for="i in 8" :key="'pop-'+i">
-            <NuxtLink :to="{ name: 'profile' }">
-              <div class="cursor-pointer flex flex-col items-center justify-center gap-2 w-20 flex-shrink-0 text-center">
-                <div class="text-xs mt-2 font-bold">Cyrilan</div>
-                <div class="w-10">
-                  <UAvatar class="w-full h-full" size="xl" src="https://github.com/benjamincanac.png" />
-                </div>
-              </div>
-            </NuxtLink>
-					</template>
+						<template v-for="artist in favoriteArtists" :key="'pop-'+artist.name">
+							<NuxtLink :to="{ name: 'profile' }">
+								<div class="cursor-pointer flex flex-col items-center justify-center gap-2 w-20 flex-shrink-0 text-center">
+									<div class="text-xs mt-2 font-bold">{{ artist.name }}</div>
+									<div class="w-10">
+										<UAvatar class="w-full h-full" size="xl" :src="artist.avatar" />
+									</div>
+								</div>
+							</NuxtLink>
+						</template>
 					</div>
 				</div>
 			</section>
