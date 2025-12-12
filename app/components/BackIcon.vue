@@ -6,7 +6,7 @@ function onClick() {
 </script>
 
 <template>
-  <UIcon class="mt-1" size="20" name="lucide:arrow-left" @click="onClick"/>
+  <UIcon class="mt-1 cursor-pointer" size="20" name="lucide:arrow-left" @click="onClick"/>
 </template>
 
 <style scoped>

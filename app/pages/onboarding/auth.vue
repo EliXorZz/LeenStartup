@@ -35,7 +35,7 @@ type Schema = z.output<typeof schema>
 
 const router = useRouter()
 function onSubmit(payload: FormSubmitEvent<Schema>) {
-  router.push({ name: 'index' })
+  router.push({ name: 'home' })
 }
 </script>
 
@@ -61,7 +61,7 @@ function onSubmit(payload: FormSubmitEvent<Schema>) {
           <UAuthForm
               :schema="schema"
               :fields="fields"
-              :submit="{ label: 'Inscription' }"
+              :submit="{ label: 'Inscription', block: true }"
               @submit="onSubmit"
           />
         </div>

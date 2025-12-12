@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import BackIcon from "~/components/BackIcon.vue";
-
 definePageMeta({
   layout: 'user',
 })
@@ -8,7 +6,7 @@ definePageMeta({
 
 <template>
   <div>
-    <div class="top w-full h-16 flex justify-between items-center text-white px-4">
+    <div class="z-10 sticky top-0 top w-full h-16 flex justify-between items-center text-white px-4">
       <div class="flex gap-4 items-center">
         <BackIcon/>
         <p class="font-semibold">_Cyrian74Tatou_</p>
@@ -18,7 +16,9 @@ definePageMeta({
       </div>
     </div>
 
-    <div class="mt-8 flex flex-col gap-2">
+    <h1 class="px-7 mt-5">Messages</h1>
+
+    <div class="mt-3 flex flex-col">
       <NuxtLink v-for="_ in 5" :to="{ name: 'messages-message' }">
         <div class="flex justify-between items-center px-7 py-3">
           <div class="flex items-center gap-3">

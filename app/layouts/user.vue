@@ -5,7 +5,7 @@
 <template>
   <div>
     <slot/>
-    <div class="w-full p-3 absolute bottom-0">
+    <div class="z-10 w-full p-3 fixed bottom-0">
       <BottomBar/>
     </div>
   </div>

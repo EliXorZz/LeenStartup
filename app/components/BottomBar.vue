@@ -1,31 +1,42 @@
 <script setup lang="ts">
-
+const route = useRoute()
+function selectedBase(current: string) {
+  return route.path.includes(current) ? ['rounded-full border-1 border-white px-2'] : null
+}
 </script>
 
 <template>
   <div class="flex justify-around text-white rounded-full px-3 glass">
-    <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-20">
-      <Icon class="text-xl" name="custom:ra-icon" />
-      <p class="text-xs font-light">RA</p>
-    </div>
-    <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-20">
-      <Icon class="text-xl" name="custom:search-icon" />
-      <p class="text-xs font-light">Recherche</p>
-    </div>
-    <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-20">
-      <Icon class="text-xl" name="custom:home-icon" />
-      <p class="text-xs font-light">Accueil</p>
-    </div>
-    <NuxtLink :to="{ name: 'messages' }">
-      <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-20">
-        <Icon class="text-xl" name="custom:chat-icon" />
-        <p class="text-xs font-light">Messages</p>
+    <NuxtLink :to="{ name: 'ar' }">
+      <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-50">
+        <Icon class="text-xl" name="custom:ra-icon"/>
+        <p class="text-xs font-light" :class="selectedBase('/ar')">RA</p>
       </div>
     </NuxtLink>
-    <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-20">
-      <Icon class="text-xl" name="custom:profile-icon" />
-      <p class="text-xs font-light">Profile</p>
-    </div>
+    <NuxtLink :to="{ name: 'search' }">
+      <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-50">
+        <Icon class="text-xl" name="custom:search-icon" />
+        <p class="text-xs font-light" :class="selectedBase('/search')">Recherche</p>
+      </div>
+    </NuxtLink>
+    <NuxtLink :to="{ name: 'home' }">
+      <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-50">
+        <Icon class="text-xl" name="custom:home-icon" />
+        <p class="text-xs font-light" :class="selectedBase('/home')">Accueil</p>
+      </div>
+    </NuxtLink>
+    <NuxtLink :to="{ name: 'messages' }">
+      <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-50">
+        <Icon class="text-xl" name="custom:chat-icon"/>
+        <p class="text-xs font-light" :class="selectedBase('/messages')">Messages</p>
+      </div>
+    </NuxtLink>
+    <NuxtLink :to="{ name: 'profile' }">
+      <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-50">
+        <Icon class="text-xl" name="custom:profile-icon"/>
+        <p class="text-xs font-light" :class="selectedBase('/profile')">Profile</p>
+      </div>
+    </NuxtLink>
   </div>
 </template>
 
