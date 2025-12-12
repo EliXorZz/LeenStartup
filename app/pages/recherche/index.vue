@@ -8,12 +8,16 @@ const query = ref('')
 const mapOpen = ref(false)
 const filtersOpen = ref(false)
 
-function openMap() { mapOpen.value = true }
-function openFilters() { filtersOpen.value = true }
+function openMap() {
+  mapOpen.value = true
+}
+function openFilters() {
+  filtersOpen.value = true
+}
 
 const items = ref([
   {
-    label: 'Gallerie',
+    label: 'Galerie',
     slot: 'images'
   },
   {
@@ -35,16 +39,12 @@ const items = ref([
                     class="flex-1 px-6 py-1 rounded-full border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 />
 
-                <button @click="openMap" class="p-3 rounded-full bg-white/10 text-white hover:bg-white/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A2 2 0 013 15.382V5.618a2 2 0 011.553-1.941L9 1l6 2 5.447 2.724A2 2 0 0121 8.618v9.764a2 2 0 01-1.553 1.941L15 23l-6-2z" />
-                    </svg>
+                <button @click="openMap" class="flex justify-center items-center p-3 rounded-full bg-white/10 text-white hover:bg-white/20">
+                  <Icon class="text-xl" name="lucide:map" />
                 </button>
 
-                <button @click="openFilters" class="p-3 rounded-full bg-white/10 text-white hover:bg-white/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L15 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 019 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
-                    </svg>
+                <button @click="openFilters" class="flex justify-center items-center p-3 rounded-full bg-white/10 text-white hover:bg-white/20">
+                  <Icon class="text-xl" name="lucide:filter" />
                 </button>
             </div>
 
@@ -83,7 +83,7 @@ const items = ref([
 
               <!-- Results area: responsive grid so cards fit on screen -->
               <main class="flex-1 overflow-auto p-4">
-                <h2 class="text-2xl font-semibold mb-4">Résultats</h2>
+                <h2 class="text-xl font-semibold mb-4">Tatoueurs</h2>
 
                 <div class="w-full flex flex-col justify-center items-center gap-3">
                   <ProfileCard/>
