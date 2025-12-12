@@ -13,10 +13,10 @@ function selectedBase(current: string) {
         <p class="text-xs font-light" :class="selectedBase('/ar')">RA</p>
       </div>
     </NuxtLink>
-    <NuxtLink :to="{ name: 'search' }">
+    <NuxtLink :to="{ name: 'recherche' }">
       <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-50">
         <Icon class="text-xl" name="custom:search-icon" />
-        <p class="text-xs font-light" :class="selectedBase('/search')">Recherche</p>
+        <p class="text-xs font-light" :class="selectedBase('/recherche')">Recherche</p>
       </div>
     </NuxtLink>
     <NuxtLink :to="{ name: 'home' }">

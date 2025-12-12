@@ -11,12 +11,9 @@ definePageMeta({
         <BackIcon/>
         <p class="font-semibold">_Cyrian74Tatou_</p>
       </div>
-      <div>
-        <UIcon class="mt-1" size="20" name="lucide:send-horizontal"/>
-      </div>
     </div>
 
-    <h1 class="px-7 mt-5">Messages</h1>
+    <h1 class="px-7 mt-5 text-xl font-semibold">Messages</h1>
 
     <div class="mt-3 flex flex-col">
       <NuxtLink v-for="_ in 5" :to="{ name: 'messages-message' }">

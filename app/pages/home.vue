@@ -25,7 +25,7 @@ definePageMeta({
 			<div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60"></div>
 
 			<div class="relative z-10 max-w-xl mx-auto h-full flex flex-col justify-center items-center px-6 text-center">
-				<p class="text-sm text-white/80 mb-3 tracking-widest">DÉCOUVRE LE CATALOGUE RÉÉDUCATIF</p>
+				<p class="text-sm text-white/80 mb-3 tracking-widest">DÉCOUVRE LE CATALOGUE</p>
 				<h1 class="text-3xl md:text-4xl font-semibold text-white mb-6">Retrouve le style qui te correspond</h1>
 				<button class="bg-white/90 text-gray-900 py-2.5 px-6 rounded-full font-medium shadow">Découvrir</button>
 				<!-- dots -->
@@ -77,7 +77,9 @@ definePageMeta({
 									</div>
 								</div>
 								<div class="mt-3 flex items-center gap-3">
-									<button class="text-sm bg-slate-800 text-white px-3 py-1 rounded-full">Voir son profil</button>
+                  <NuxtLink :to="{ name: 'profile' }">
+                    <button class="cursor-pointer text-sm bg-slate-800 text-white px-3 py-1 rounded-full">Voir son profil</button>
+									</NuxtLink>
 								</div>
 							</div>
 						</div>
@@ -92,12 +94,14 @@ definePageMeta({
 					<h3 class="text-sm mb-3 font-bold">Les tatoueurs populaires</h3>
 					<div class="flex gap-1 overflow-x-auto pb-2">
 					<template v-for="i in 8" :key="'pop-'+i">
-						<div class="flex flex-col items-center justify-center gap-2 w-20 flex-shrink-0 text-center">
-							<div class="text-xs mt-2 font-bold">Cyrilan</div>
-              <div class="w-10">
-                <UAvatar class="w-full h-full" size="xl" src="https://github.com/benjamincanac.png" />
+            <NuxtLink :to="{ name: 'profile' }">
+              <div class="cursor-pointer flex flex-col items-center justify-center gap-2 w-20 flex-shrink-0 text-center">
+                <div class="text-xs mt-2 font-bold">Cyrilan</div>
+                <div class="w-10">
+                  <UAvatar class="w-full h-full" size="xl" src="https://github.com/benjamincanac.png" />
+                </div>
               </div>
-						</div>
+            </NuxtLink>
 					</template>
 					</div>
 				</div>
