@@ -1,0 +1,1 @@
+import{a as e}from"./BhNhUaj0.js";import{e as t,z as s,m as a,o as r}from"./eWEjO_t7.js";const _=t({__name:"BackIcon",setup(m){const o=s();function n(){o.back()}return(i,p)=>{const c=e;return r(),a(c,{class:"mt-1 cursor-pointer",size:"20",name:"lucide:arrow-left",onClick:n})}}}),k=Object.assign(_,{__name:"BackIcon"});export{k as _};
