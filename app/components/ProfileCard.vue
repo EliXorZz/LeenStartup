@@ -1,40 +1,54 @@
 
 <script setup lang="ts">
-defineProps({
-  name: String,
-});
+import { withDefaults, defineProps } from 'vue'
+
+const props = withDefaults(defineProps<{
+  name?: string
+  rating?: number
+  reviews?: number
+  description?: string
+  tags?: string[]
+  images?: string[]
+  avatar?: string
+}>(), {
+  name: 'Dylan',
+  rating: 4.4,
+  reviews: 120,
+  description: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit.',
+  tags: ['Brulure', 'Cicatrice'],
+  images: ['/galerie/tattoo1.jpg', '/galerie/tattoo2.jpg', '/galerie/tattoo3.jpg'],
+  avatar: 'https://github.com/benjamincanac.png'
+})
 </script>
 
 <template>
-  <div id="container" class="relative flex flex-col gap-3 bg-gray-100 p-5 rounded-2xl">
+  <div id="container" class="relative flex flex-col gap-3 bg-gray-100 p-5 rounded-2xl w-full max-w-md">
     <div class="profile">
-      <UAvatar size="xl" src="https://github.com/benjamincanac.png" />
+      <UAvatar :src="props.avatar" size="xl" />
       <div class="content">
         <div class="name">
-          <p>Dylan</p>
+          <p>{{ props.name }}</p>
         </div>
         <div class="notation">
           <Icon size="15" class="text-xl" name="custom:stars-icon"/>
-          <p>4.4</p>
+          <p>{{ props.rating }}</p>
+          <span class="text-xs text-gray-400">({{ props.reviews }})</span>
         </div>
       </div>
     </div>
     <div class="description">
-      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+      <p>{{ props.description }}</p>
     </div>
     <div class="tags">
-      <div class="bg-[#AED39A]">Brulure</div>
-      <div class="bg-[#29282D]">Cicatrice</div>
+      <div v-for="(tag, i) in props.tags" :key="i" :class="['px-3 py-1 rounded-full text-xs', tag === 'Cicatrice' ? 'bg-[#29282D] text-white' : 'bg-[#AED39A] text-black']">{{ tag }}</div>
     </div>
     <div class="images">
-      <img src="~/assets/tatouage1.jpg"/>
-      <img src="~/assets/tatouage2.jpg"/>
-      <img src="~/assets/tatouage3.jpg"/>
+      <img v-for="(img, i) in props.images" :key="i" :src="img" alt="tattoo"/>
     </div>
     <NuxtLink :to="{ name: 'profile' }">
       <div class="action">
-        <p>Voir son profile</p>
-          <UIcon size="20" name="lucide:arrow-right"/>
+        <p>Voir son profil</p>
+        <UIcon size="20" name="lucide:arrow-right"/>
       </div>
     </NuxtLink>
   </div>
@@ -128,7 +142,6 @@ defineProps({
   width: 100%;
   height: 100px;
 
-  background-color: red;
   border-radius: 20px;
 
   overflow: hidden;
@@ -138,7 +151,6 @@ defineProps({
 
 .images img {
   width: 34%;
-  background-color: white;
   object-fit: cover;
 }
 

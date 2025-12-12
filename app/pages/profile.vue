@@ -15,7 +15,8 @@ definePageMeta({
         <UIcon class="mt-1" size="20" name="lucide:send-horizontal"/>
       </NuxtLink>
     </div>
-
+    
+    <img src="/banner8.png" alt="Banner" class="w-full h-auto object-cover block sticky top-16 z-0" />
     <div class="w-full flex justify-center pt-10 px-10">
       <div class="flex flex-col gap-2 w-full">
         <div class="flex gap-5">

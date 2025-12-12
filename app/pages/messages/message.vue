@@ -1,7 +1,5 @@
 <script setup lang="ts">
-definePageMeta({
-  layout: 'user',
-})
+
 interface Message {
   text: string
   sender: 'user' | 'other'
@@ -24,7 +22,7 @@ const messages = ref<Message[]>([
         <p class="font-semibold">_Cyrian74Tatou_</p>
       </div>
     </div>
-
+    <img src="/banner8.png" alt="Banner" class="w-full h-auto object-cover block" />
     <div ref="chatContainer" class="flex flex-col gap-3 px-4 pt-4 overflow-y-auto h-[calc(100dvh-260px)] pb-10">
       <div
           v-for="(msg, index) in messages"
@@ -65,9 +63,23 @@ const messages = ref<Message[]>([
       </div>
     </div>
 
-    <div class="fixed bottom-22 flex items-center bg-slate-100 py-5 w-full">
-      <div class="px-5 w-full">
-        <UTextarea class="cursor-pointer w-full" placeholder="Mon message ..." trailing-icon="lucide:send-horizontal"/>
+    <div class="fixed bottom-0 left-0 right-0 flex justify-center px-4 pb-6">
+      <div class="w-full max-w-3xl">
+        <div class="bg-[#2f2f33] rounded-full flex items-center px-4 py-3 shadow-inner glass">
+          <button class="w-10 h-10 flex items-center justify-center rounded-full bg-[#a07b72] text-white mr-3">
+            <UIcon name="lucide:image" size="18" />
+          </button>
+
+          <input
+            type="text"
+            placeholder="Votre message..."
+            class="flex-1 bg-transparent outline-none text-gray-200 placeholder-gray-400"
+          />
+
+          <button class="w-10 h-10 flex items-center justify-center rounded-full bg-[#c08b7f] text-white ml-3">
+            <UIcon name="lucide:mic" size="18" />
+          </button>
+        </div>
       </div>
     </div>
 
@@ -77,6 +89,14 @@ const messages = ref<Message[]>([
 <style scoped>
 .top {
   background-color: #29282D;
+}
+
+.glass {
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(0, 0, 0, 0.3);
 }
 </style>
 

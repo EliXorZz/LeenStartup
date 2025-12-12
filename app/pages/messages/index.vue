@@ -12,7 +12,8 @@ definePageMeta({
         <p class="font-semibold">_Cyrian74Tatou_</p>
       </div>
     </div>
-
+    
+    <img src="/banner8.png" alt="Banner" class="w-full h-auto object-cover block" />
     <h1 class="px-7 mt-5 text-xl font-semibold">Messages</h1>
 
     <div class="mt-3 flex flex-col">

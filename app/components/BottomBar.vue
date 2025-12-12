@@ -34,7 +34,7 @@ function selectedBase(current: string) {
     <NuxtLink :to="{ name: 'profile' }">
       <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-50">
         <Icon class="text-xl" name="custom:profile-icon"/>
-        <p class="text-xs font-light" :class="selectedBase('/profile')">Profile</p>
+        <p class="text-xs font-light" :class="selectedBase('/profile')">Profil</p>
       </div>
     </NuxtLink>
   </div>
