@@ -52,6 +52,27 @@ const items = ref([
         </div>
 
         <div class="px-5">
+          <!-- Map overlay (placeholder) -->
+          <div v-if="mapOpen" class="fixed inset-0 z-40 bg-black/60 flex items-center justify-center">
+            <div class="bg-white rounded-lg p-6 w-11/12 max-w-3xl">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium">Map</h3>
+                <button @click="mapOpen = false" class="text-sm text-gray-600">Fermer</button>
+              </div>
+              <div class="h-64 bg-gray-100 rounded">Carte (placeholder)</div>
+            </div>
+          </div>
+
+          <!-- Filters panel -->
+          <div v-if="filtersOpen" class="fixed inset-y-0 right-0 z-50 w-80 bg-white p-4 shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-medium">Filtres</h3>
+              <button @click="filtersOpen = false" class="text-sm text-gray-600">Fermer</button>
+            </div>
+            <div class="space-y-3">
+              <div class="text-sm text-gray-500">(Options de filtre placeholder)</div>
+            </div>
+          </div>
           <UTabs
               size="md"
               variant="pill"
@@ -59,28 +80,6 @@ const items = ref([
               class="w-full bg-white/0"
           >
             <template #tatoueurs>
-              <!-- Map overlay (placeholder) -->
-              <div v-if="mapOpen" class="fixed inset-0 z-40 bg-black/60 flex items-center justify-center">
-                <div class="bg-white rounded-lg p-6 w-11/12 max-w-3xl">
-                  <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-medium">Map</h3>
-                    <button @click="mapOpen = false" class="text-sm text-gray-600">Fermer</button>
-                  </div>
-                  <div class="h-64 bg-gray-100 rounded">Carte (placeholder)</div>
-                </div>
-              </div>
-
-              <!-- Filters panel -->
-              <div v-if="filtersOpen" class="fixed inset-y-0 right-0 z-50 w-80 bg-white p-4 shadow-lg">
-                <div class="flex justify-between items-center mb-4">
-                  <h3 class="text-lg font-medium">Filtres</h3>
-                  <button @click="filtersOpen = false" class="text-sm text-gray-600">Fermer</button>
-                </div>
-                <div class="space-y-3">
-                  <div class="text-sm text-gray-500">(Options de filtre placeholder)</div>
-                </div>
-              </div>
-
               <!-- Results area: responsive grid so cards fit on screen -->
               <main class="flex-1 overflow-auto p-4">
                 <h2 class="text-xl font-semibold mb-4">Tatoueurs</h2>
