@@ -14,10 +14,12 @@
       <Icon class="text-xl" name="custom:search-icon" />
       <p class="text-xs font-light">Recherche</p>
     </div>
-    <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-20">
-      <Icon class="text-xl" name="custom:home-icon" />
-      <p class="text-xs font-light">Accueil</p>
-    </div>
+    <NuxtLink :to="{ name: 'index' }">
+      <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-20">
+        <Icon class="text-xl" name="custom:home-icon" />
+        <p class="text-xs font-light">Accueil</p>
+      </div>
+    </NuxtLink>
     <NuxtLink :to="{ name: 'messages' }">
       <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-20">
         <Icon class="text-xl" name="custom:chat-icon" />
