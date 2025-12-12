@@ -10,10 +10,12 @@
         <p class="text-xs font-light">RA</p>
       </div>
     </NuxtLink>
-    <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-20">
-      <Icon class="text-xl" name="custom:search-icon" />
-      <p class="text-xs font-light">Recherche</p>
-    </div>
+    <NuxtLink :to="{ name: 'recherche' }">
+      <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-20">
+        <Icon class="text-xl" name="custom:search-icon" />
+        <p class="text-xs font-light">Recherche</p>
+      </div>
+    </NuxtLink>
     <NuxtLink :to="{ name: 'index' }">
       <div class="flex flex-col gap-1 items-center p-2 cursor-pointer hover:opacity-20">
         <Icon class="text-xl" name="custom:home-icon" />
