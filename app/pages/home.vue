@@ -62,7 +62,9 @@ definePageMeta({
 				<div class="px-4 md:px-8">
 					<div class="mt-6">
 						<div class="bg-white rounded-xl shadow p-4 flex items-center gap-4">
-							<img src="https://images.unsplash.com/photo-1540218858-2b6c6a4af86b?q=80&w=400&auto=format&fit=crop&ixlib=rb-4.0.3&s=artistimg" alt="avatar" class="w-16 h-16 rounded-full object-cover" />
+              <div class="w-20">
+                <UAvatar class="w-full h-full" size="xl" src="https://github.com/benjamincanac.png" />
+              </div>
 							<div class="flex-1">
 								<div class="flex items-center justify-between">
 									<div>
@@ -76,7 +78,6 @@ definePageMeta({
 								</div>
 								<div class="mt-3 flex items-center gap-3">
 									<button class="text-sm bg-slate-800 text-white px-3 py-1 rounded-full">Voir son profil</button>
-									<button class="text-sm text-gray-600 underline">Voir samples</button>
 								</div>
 							</div>
 						</div>
@@ -86,14 +87,16 @@ definePageMeta({
 					<img src="/banner4.svg" alt="Banner" class="w-full h-auto object-cover block" />
 				</div>
 			</section>
-			<section class="-mx-4 md:-mx-8 mt-6 bg-[#29282d]">
+			<section class="-mx-4 md:-mx-8 mt-6 bg-[#29282d] py-5">
 				<div class="px-4 md:px-8 text-white">
-					<h3 class="text-sm mb-3">Les tatoueurs populaires</h3>
-					<div class="flex gap-4 overflow-x-auto pb-2">
+					<h3 class="text-sm mb-3 font-bold">Les tatoueurs populaires</h3>
+					<div class="flex gap-1 overflow-x-auto pb-2">
 					<template v-for="i in 8" :key="'pop-'+i">
-						<div class="w-20 flex-shrink-0 text-center">
-							<img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop&ixlib=rb-4.0.3&s=avatar" class="w-14 h-14 rounded-full mx-auto object-cover border-2 border-white shadow-sm" />
-							<div class="text-xs mt-2">Cyrilan</div>
+						<div class="flex flex-col items-center justify-center gap-2 w-20 flex-shrink-0 text-center">
+							<div class="text-xs mt-2 font-bold">Cyrilan</div>
+              <div class="w-10">
+                <UAvatar class="w-full h-full" size="xl" src="https://github.com/benjamincanac.png" />
+              </div>
 						</div>
 					</template>
 					</div>
