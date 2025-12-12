@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import * as z from 'zod'
-import type { FormSubmitEvent, AuthFormField } from '@nuxt/ui'
+import type { AuthFormField } from '@nuxt/ui'
 
 definePageMeta({
   layout: 'user',
 })
+
+const user = {
+  name: 'Lisa Dupont',
+  username: 'lisa.art',
+  email: 'lisa@example.com',
+  avatar: 'https://i.pravatar.cc/150?img=47'
+}
 
 const fields: AuthFormField[] = [
   {
@@ -13,7 +20,7 @@ const fields: AuthFormField[] = [
     label: 'Nom d\'utilisateur',
     placeholder: 'Entre ton nom d\'utilisateur',
     required: false,
-    defaultValue: '_Cyrian74Tatou_'
+    defaultValue: user.username
   },
   {
     name: 'email',
@@ -21,7 +28,7 @@ const fields: AuthFormField[] = [
     label: 'Email',
     placeholder: 'Entre ton adresse mail',
     required: false,
-    defaultValue: 'cyrian@gmail.com'
+    defaultValue: user.email
   },
 ]
 
@@ -36,7 +43,7 @@ type Schema = z.output<typeof schema>
     <div class="z-10 sticky top-0 top w-full h-16 flex justify-between items-center text-white px-4">
       <div class="flex gap-4 items-center">
         <BackIcon/>
-        <p class="font-semibold">_Cyrian74Tatou_</p>
+        <p class="font-semibold">{{ user.username }}</p>
       </div>
     </div>
 
@@ -44,10 +51,10 @@ type Schema = z.output<typeof schema>
       <div class="flex flex-col gap-2 w-full">
         <div class="flex gap-5 items-center">
           <div class="w-20">
-            <UAvatar class="w-full h-full" src="https://github.com/benjamincanac.png" />
+            <UAvatar class="w-full h-full" :src="user.avatar" />
           </div>
           <div class="flex flex-col gap-1.5">
-            <p class="text-lg">Cyrian</p>
+            <p class="text-lg">{{ user.name }}</p>
           </div>
         </div>
 

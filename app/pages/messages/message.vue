@@ -11,6 +11,10 @@ const messages = ref<Message[]>([
   { text: 'Très bien ! Quelle taille et quelle zone exactement ?', sender: 'other' },
   { text: 'Parfait', sender: 'user' },
 ])
+
+const route = useRoute()
+const userName = computed(() => (route.query.name as string) || '_Cyrian74Tatou_')
+const userSrc = computed(() => (route.query.src as string) || '/profile/tattoo1.jpg')
 </script>
 
 <template>
@@ -19,7 +23,8 @@ const messages = ref<Message[]>([
     <div class="z-10 sticky top-0 top w-full h-16 flex justify-between items-center text-white px-4">
       <div class="flex gap-4 items-center">
         <BackIcon/>
-        <p class="font-semibold">_Cyrian74Tatou_</p>
+        <UAvatar size="md" :src="userSrc" />
+        <p class="font-semibold">{{ userName }}</p>
       </div>
     </div>
     <img src="/banner8.png" alt="Banner" class="w-full h-auto object-cover block" />
