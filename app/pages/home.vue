@@ -1,16 +1,35 @@
 <script setup lang="ts">
 const categories = [
-	'Cicatrice',
-	'Brûlure',
-	'Tatouage permanent',
-	'Moignons',
-	'Reconstruction mammaire',
-	'Cover'
+	{ label: 'Cicatrice', img: '/home/cicatrice.png' },
+	{ label: 'Brûlure', img: '/home/brulure.png' },
+	{ label: 'Tatouage permanent', img: '/home/tatouage_permanent.png' },
+	{ label: 'Moignons', img: '/home/moignon.jpg' },
+	{ label: 'Aréole', img: '/home/areole.jpg' },
+	{ label: 'Cover', img: '/home/cover.png' },
 ] as const;
 
+const featuredArtist = {
+	name: 'Léa Martin',
+	description: 'Gris & Bio-ink, textures et recouvrements',
+	rating: '4.9',
+	reviews: 420,
+	avatar: 'https://i.pravatar.cc/150?img=12',
+};
+
+const favoriteArtists = [
+	{ name: 'Léa', avatar: 'https://i.pravatar.cc/150?img=1' },
+	{ name: 'Noah', avatar: 'https://i.pravatar.cc/150?img=2' },
+	{ name: 'Maya', avatar: 'https://i.pravatar.cc/150?img=3' },
+	{ name: 'Lucas', avatar: 'https://i.pravatar.cc/150?img=4' },
+	{ name: 'Inès', avatar: 'https://i.pravatar.cc/150?img=5' },
+	{ name: 'Sofiane', avatar: 'https://i.pravatar.cc/150?img=6' },
+	{ name: 'Zoé', avatar: 'https://i.pravatar.cc/150?img=7' },
+	{ name: 'Hugo', avatar: 'https://i.pravatar.cc/150?img=8' },
+];
+
 definePageMeta({
-  layout: 'user',
-})
+	layout: 'user',
+});
 </script>
 
 <template>
@@ -18,13 +37,13 @@ definePageMeta({
 		<!-- Hero -->
 		<section class="relative h-[62vh] md:h-[68vh] overflow-hidden">
 			<img
-				src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=6a1b6d0a1a6b2b1c2c3d4e5f6a7b8c9d"
+				src="/img/home.jpg"
 				alt="Hero"
 				class="absolute inset-0 w-full h-full object-cover"
 			/>
-			<div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60"></div>
+			<div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/80"></div>
 
-			<div class="relative z-10 max-w-xl mx-auto h-full flex flex-col justify-center items-center px-6 text-center">
+			<div class="relative z-10 max-w-xl mx-auto h-full flex flex-col justify-end items-center px-6 text-center pb-8">
 				<p class="text-sm text-white/80 mb-3 tracking-widest">DÉCOUVRE LE CATALOGUE</p>
 				<h1 class="text-3xl md:text-4xl font-semibold text-white mb-6">Retrouve le style qui te correspond</h1>
 				<NuxtLink :to="{ name: 'recherche' }">
@@ -42,42 +61,45 @@ definePageMeta({
 		<main class="mt-6 px-4 pb-16 md:px-8">
 			<!-- Categories grid -->
 			<section class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-				<template v-for="(label, idx) in categories" :key="label">
-					<NuxtLink :to="{ name: 'recherche' }">
-            <div class="cursor-pointer relative rounded-xl overflow-hidden h-28 bg-gray-200 shadow-sm">
-              <img
-                  src="https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=abcd1234"
-                  :alt="label"
-                  class="w-full h-full object-cover grayscale/20 brightness-75"
-              />
-              <div class="absolute inset-0 bg-black/25"></div>
-              <div class="absolute bottom-2 left-2 right-2 text-white">
-                <div class="bg-black/40 px-3 py-1 rounded-full inline-block text-sm">{{ label }}</div>
-              </div>
-            </div>
-          </NuxtLink>
-				</template>
+								<template v-for="(cat, idx) in categories" :key="cat.label">
+										<NuxtLink :to="{ name: 'recherche' }">
+						<div class="cursor-pointer relative rounded-xl overflow-hidden h-28 bg-gray-200 shadow-sm">
+							<img
+									:src="cat.img"
+									:alt="cat.label"
+									class="w-full h-full object-cover grayscale/20 brightness-75"
+							/>
+							<div class="absolute inset-0 bg-black/25"></div>
+							<div class="absolute bottom-2 left-2 right-2 text-white">
+								<div class="bg-black/40 px-3 py-1 rounded-full inline-block text-sm">{{ cat.label }}</div>
+							</div>
+						</div>
+					</NuxtLink>
+								</template>
 			</section>
 
 			<section class="-mx-4 md:-mx-8 mt-6 bg-[#a57a69]">
 				<div class="overflow-hidden">
 					<img src="/banner2.svg" alt="Banner" class="w-full h-auto object-cover block" />
 				</div>
+				<div class="px-4 md:px-8 text-white mt-6">
+					<h3 class="text-sm mb-3 font-bold">Le tatoueur du moment</h3>
+				</div>
 				<div class="px-4 md:px-8">
 					<div class="mt-6">
-						<div class="bg-white rounded-xl shadow p-4 flex items-center gap-4">
-              <div class="w-20">
-                <UAvatar class="w-full h-full" size="xl" src="https://github.com/benjamincanac.png" />
-              </div>
+						<div class="bg-white/75 rounded-xl shadow p-4 flex items-center gap-4">
+							<div class="w-20">
+								<UAvatar class="w-full h-full" size="xl" :src="featuredArtist.avatar" />
+							</div>
 							<div class="flex-1">
 								<div class="flex items-center justify-between">
 									<div>
-										<div class="font-semibold">Cyrilan G</div>
-										<div class="text-xs text-gray-500 mt-0.5">Gris & Bio-ink, textures et recouvrements</div>
+										<div class="font-semibold">{{ featuredArtist.name }}</div>
+										<div class="text-xs text-gray-500 mt-0.5">{{ featuredArtist.description }}</div>
 									</div>
 									<div class="text-right">
-										<div class="text-sm font-medium">4.8</div>
-										<div class="text-xs text-gray-400">(320)</div>
+										<div class="text-sm font-medium">{{ featuredArtist.rating }}</div>
+										<div class="text-xs text-gray-400">({{ featuredArtist.reviews }})</div>
 									</div>
 								</div>
 								<div class="mt-3 flex items-center gap-3">
@@ -90,23 +112,23 @@ definePageMeta({
 					</div>
 				</div>
 				<div class="overflow-hidden mt-6">
-					<img src="/banner4.svg" alt="Banner" class="w-full h-auto object-cover block" />
+					<img src="/banner6.svg" alt="Banner" class="w-full h-auto object-cover block" />
 				</div>
 			</section>
-			<section class="-mx-4 md:-mx-8 mt-6 bg-[#29282d] py-5">
-				<div class="px-4 md:px-8 text-white">
-					<h3 class="text-sm mb-3 font-bold">Les tatoueurs populaires</h3>
+			<section class="-mx-4 md:-mx-8 bg-[#29282d] py-5 pb-20 md:pb-28 -mb-16">
+				<div class="px-4 md:px-8 text-white mt-6">
+					<h3 class="text-sm mb-3 font-bold">Les tatoueurs favoris	</h3>
 					<div class="flex gap-1 overflow-x-auto pb-2">
-					<template v-for="i in 8" :key="'pop-'+i">
-            <NuxtLink :to="{ name: 'profile' }">
-              <div class="cursor-pointer flex flex-col items-center justify-center gap-2 w-20 flex-shrink-0 text-center">
-                <div class="text-xs mt-2 font-bold">Cyrilan</div>
-                <div class="w-10">
-                  <UAvatar class="w-full h-full" size="xl" src="https://github.com/benjamincanac.png" />
-                </div>
-              </div>
-            </NuxtLink>
-					</template>
+						<template v-for="artist in favoriteArtists" :key="'pop-'+artist.name">
+							<NuxtLink :to="{ name: 'profile' }">
+								<div class="cursor-pointer flex flex-col items-center justify-center gap-2 w-20 flex-shrink-0 text-center">
+									<div class="text-xs mt-2 font-bold">{{ artist.name }}</div>
+									<div class="w-10">
+										<UAvatar class="w-full h-full" size="xl" :src="artist.avatar" />
+									</div>
+								</div>
+							</NuxtLink>
+						</template>
 					</div>
 				</div>
 			</section>

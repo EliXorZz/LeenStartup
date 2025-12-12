@@ -7,6 +7,20 @@ import { ref } from 'vue'
 const query = ref('')
 const mapOpen = ref(false)
 const filtersOpen = ref(false)
+const galleryImages = ref([
+  '/galerie/tattoo1.jpg',
+  '/galerie/tattoo2.jpg',
+  '/galerie/tattoo3.jpg',
+  '/galerie/tattoo4.jpg',
+  '/galerie/tattoo5.jpg',
+  '/galerie/tattoo6.jpg',
+  '/galerie/tattoo7.jpg',
+  '/galerie/tattoo8.jpg',
+  '/galerie/tattoo9.jpg',
+  '/galerie/tattoo10.jpg',
+  '/galerie/tattoo11.jpg',
+  '/galerie/tattoo12.jpg'
+])
 
 function openMap() {
   mapOpen.value = true
@@ -30,7 +44,7 @@ const items = ref([
 <template>
     <div class="w-full min-h-screen flex flex-col">
         <!-- Header with search + icons (kept from index) -->
-        <div class="flex flex-col justify-center items-center h-full w-full mb-4 bg-[#29282d] px-4 py-4">
+        <div class="flex flex-col justify-center items-center h-full w-full bg-[#29282d] px-4 py-4">
             <div class="flex items-center gap-3">
                 <input
                     v-model="query"
@@ -50,7 +64,8 @@ const items = ref([
 
             <!-- Keep any other header controls as needed -->
         </div>
-
+        <img src="/banner8.png" alt="Banner" class="w-full h-auto object-cover block" />
+        
         <div class="px-5">
           <!-- Map overlay (placeholder) -->
           <div v-if="mapOpen" class="fixed inset-0 z-40 bg-black/60 flex items-center justify-center">
@@ -85,33 +100,69 @@ const items = ref([
                 <h2 class="text-xl font-semibold mb-4">Tatoueurs</h2>
 
                 <div class="w-full flex flex-col justify-center items-center gap-3">
-                  <ProfileCard/>
-                  <ProfileCard/>
-                  <ProfileCard/>
-                  <ProfileCard/>
+                  <ProfileCard
+                    name="Cyrilan G"
+                    :rating="4.8"
+                    :reviews="320"
+                    description="Gris & Bio-ink, textures et recouvrements"
+                    :tags="['Gris','Bio-ink']"
+                    :images="['/galerie/tattoo1.jpg','/galerie/tattoo2.jpg','/galerie/tattoo3.jpg']"
+                    avatar="https://github.com/benjamincanac.png"
+                  />
+                  <ProfileCard
+                    name="Margot L"
+                    :rating="4.6"
+                    :reviews="210"
+                    description="Couleurs vives, micro-realism"
+                    :tags="['Cover','Realism']"
+                    :images="['/galerie/tattoo4.jpg','/galerie/tattoo5.jpg','/galerie/tattoo6.jpg']"
+                    avatar="https://github.com/identicon.png"
+                  />
+                  <ProfileCard
+                    name="Jules R"
+                    :rating="4.9"
+                    :reviews="540"
+                    description="Textures, dépôts et recouvrements"
+                    :tags="['Textures','Recouvrements']"
+                    :images="['/galerie/tattoo7.jpg','/galerie/tattoo8.jpg','/galerie/tattoo9.jpg']"
+                    avatar="https://github.com/identicon2.png"
+                  />
+                  <ProfileCard
+                    name="Amina K"
+                    :rating="4.7"
+                    :reviews="128"
+                    description="Aréoles et réparations esthétiques"
+                    :tags="['Aréole','Réparations']"
+                    :images="['/galerie/tattoo10.jpg','/galerie/tattoo11.jpg','/galerie/tattoo12.jpg']"
+                    avatar="https://github.com/identicon3.png"
+                  />
                 </div>
               </main>
             </template>
             <template #images>
-              <div class="mt-6 grid grid-cols-3 gap-1">
-                <div v-for="i in 24" :key="i" class="w-full aspect-square overflow-hidden">
-                  <UModal>
-                    <img
-                        src="~/assets/galerie.jpg"
-                        alt=""
-                        class="w-full h-full object-cover"
-                    />
+              <main class="flex-1 overflow-auto p-4">
+                <h2 class="text-xl font-semibold mb-4">Tatouages</h2>
 
-                    <template #content>
+                <div class="mt-6 grid grid-cols-3 gap-1">
+                  <div v-for="(img, i) in galleryImages" :key="i" class="w-full aspect-square overflow-hidden relative">
+                    <UModal>
                       <img
-                          src="~/assets/galerie.jpg"
-                          alt=""
+                          :src="img"
+                          :alt="`Tatouage ${i + 1}`"
                           class="w-full h-full object-cover"
                       />
-                    </template>
-                  </UModal>
+
+                      <template #content>
+                        <img
+                            :src="img"
+                            :alt="`Tatouage ${i + 1}`"
+                            class="w-full h-full object-cover"
+                        />
+                      </template>
+                    </UModal>
+                  </div>
                 </div>
-              </div>
+              </main>
             </template>
           </UTabs>
         </div>

@@ -9,34 +9,35 @@ definePageMeta({
     <div class="z-10 sticky top-0 top w-full h-16 flex justify-between items-center text-white px-4">
       <div class="flex gap-4 items-center">
         <BackIcon/>
-        <p class="font-semibold">_Cyrian74Tatou_</p>
+        <p class="font-semibold">_LucaInkStudio_</p>
       </div>
       <NuxtLink :to="{ name: 'messages-message' }">
         <UIcon class="mt-1" size="20" name="lucide:send-horizontal"/>
       </NuxtLink>
     </div>
-
+    
+    <img src="/banner8.png" alt="Banner" class="w-full h-auto object-cover block sticky top-16 z-0" />
     <div class="w-full flex justify-center pt-10 px-10">
       <div class="flex flex-col gap-2 w-full">
         <div class="flex gap-5">
-          <div class="w-20">
-            <UAvatar class="w-full h-full" src="https://github.com/benjamincanac.png" />
+            <div class="w-20">
+            <UAvatar class="w-full h-full" src="/profile/tattoo1.jpg" />
           </div>
           <div class="flex flex-col gap-1.5">
-            <p class="text-lg">Cyrian</p>
+            <p class="text-lg">Luca Marin</p>
             <div class="flex gap-5 leading-none">
               <div class="flex flex-col justify-center items-center gap-1">
-                <p class="font-bold">4.8</p>
+                <p class="font-bold">4.9</p>
                 <p class="text-sm">Note</p>
               </div>
 
               <div class="flex flex-col justify-center items-center gap-1">
-                <p class="font-bold">+400</p>
+                <p class="font-bold">+128</p>
                 <p class="text-sm">Avis</p>
               </div>
 
               <div class="flex flex-col justify-center items-center gap-1">
-                <p class="font-bold">140</p>
+                <p class="font-bold">350</p>
                 <p class="text-sm">Tatouages</p>
               </div>
             </div>
@@ -46,17 +47,17 @@ definePageMeta({
         <div class="flex justify-between">
           <div class="mt-2 flex flex-col">
             <p class="text-sm font-semibold">France</p>
-            <p class="text-xs">Rue de l'arc en ciel</p>
+            <p class="text-xs">12 Rue des Artisans, Paris</p>
           </div>
 
           <div class="mt-3 flex gap-2">
-            <UBadge class="rounded-full px-3 bg-[#AED39A]">Cicatrice</UBadge>
-            <UBadge class="rounded-full px-3 bg-[#29282D]">Brulure</UBadge>
+            <UBadge class="rounded-full px-3 bg-[#AED39A]">Cover-up</UBadge>
+            <UBadge class="rounded-full px-3 bg-[#29282D]">Blackwork</UBadge>
           </div>
 
         </div>
 
-        <p class="mt-3 text-sm">Le tatoueur qui répare vos cicatrices</p>
+        <p class="mt-3 text-sm">Spécialiste du blackwork et cover-up</p>
 
         <UButton :to="{ name: 'messages-message' }" class="mt-5 rounded-full justify-center">Contacter</UButton>
         <UButton :to="{ name: 'reviews' }" class="mt-2 rounded-full justify-center">Connaître les avis</UButton>
@@ -65,15 +66,15 @@ definePageMeta({
           <div v-for="i in 12" :key="i" class="w-full aspect-square overflow-hidden">
             <UModal>
               <img
-                  src="~/assets/galerie.jpg"
-                  alt=""
+                  :src="`/profile/tattoo${i}.jpg`"
+                  alt="Tatouage"
                   class="w-full h-full object-cover"
               />
 
               <template #content>
                 <img
-                    src="~/assets/galerie.jpg"
-                    alt=""
+                    :src="`/profile/tattoo${i}.jpg`"
+                    alt="Tatouage"
                     class="w-full h-full object-cover"
                 />
               </template>
